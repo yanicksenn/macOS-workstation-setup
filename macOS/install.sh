@@ -122,10 +122,6 @@ sdk_install() {
 
 # Installation & usage of pyenv
 
-install_pyenv() {
-  brew_install pyenv
-}
-
 install_pyenv_update() {
   local path=$(pyenv root)/plugins/pyenv-update
 
@@ -171,7 +167,7 @@ install() {
 
   # Install Python & Tools
   log "Installing Python & Tools ..."
-  install_pyenv
+  brew_install pyenv
   install_pyenv_update
   pyenv_install "$PYTHON_VERSION"
   log ""
