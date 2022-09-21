@@ -151,8 +151,6 @@ pyenv_install() {
 }
 
 
-# Main installation
-
 install() {
   log "Setup workspace - macOS"
   log "  Version: $VERSION"
@@ -187,8 +185,8 @@ install() {
   sdk_install gradle
   log ""
 
-  # Install tools
-  log "Installing tools ..."
+  # Install Tools
+  log "Installing Tools ..."
   brew_install_cask jetbrains-toolbox
   brew_install_cask visual-studio-code
   brew_install_cask cyberduck
@@ -208,4 +206,5 @@ LOGFILE=$(mktemp ~/install-$VERSION.log.XXXXXXXX) || exit 1
 PYTHON_VERSION=3.10.6
 JAVA_VERSION=17.0.2-open
 
+# Perform installation
 install
