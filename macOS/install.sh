@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 
+# Installation script containing all sdks and tools to my
+# personal liking. Feel free to fork and modify this file.
+
+# Single-line invocation:
+# /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/yanicksenn/setup/main/macOS/setup.sh)"
+
+
+# Utilities
+
+# Hard-copy these utility functions into this file so it
+# can be invoked with a single curl line.
+
 log() {
   echo "$1" | tee -a "$LOGFILE"
 }
@@ -28,6 +40,9 @@ command_exists() {
   fi
 }
 
+
+# Installation of xcode
+
 install_prereq_xcode() {
   if ! xcode-select -p &> /dev/null; then
     log "  Installing xcode ..."
@@ -37,6 +52,9 @@ install_prereq_xcode() {
     log "  xcode already installed"
   fi
 }
+
+
+# Installation & usage of brew
 
 install_prereq_brew() {
   if ! command_exists "brew"; then
@@ -72,6 +90,9 @@ brew_install_cask() {
   fi
 }
 
+
+# Installation & usage of sdkman
+
 install_sdkman() {
   if ! command_exists "sdk"; then
     log "  Installing sdkman ..."
@@ -99,7 +120,7 @@ sdk_install() {
 }
 
 
-# Python installation
+# Installation & usage of pyenv
 
 install_pyenv() {
   brew_install pyenv
