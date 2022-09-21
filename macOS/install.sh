@@ -28,7 +28,7 @@ command_exists() {
   fi
 }
 
-setup_xcode() {
+install_prereq_xcode() {
   if ! xcode-select -p &> /dev/null; then
     log "  Installing xcode ..."
     xcode-select --install >> "$LOGFILE"
@@ -38,7 +38,7 @@ setup_xcode() {
   fi
 }
 
-setup_brew() {
+install_prereq_brew() {
   if ! command_exists "brew"; then
     log "  Installing brew ..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" >> "$LOGFILE"
@@ -72,7 +72,7 @@ brew_install_cask() {
   fi
 }
 
-setup_sdkman() {
+install_sdkman() {
   if ! command_exists "sdk"; then
     log "  Installing sdkman ..."
     curl -s "https://get.sdkman.io" | bash >> "$LOGFILE"
@@ -83,7 +83,7 @@ setup_sdkman() {
   fi
 }
 
-sdkman_install() {
+sdk_install() {
   local name=$1
   local version=$2
 
@@ -91,7 +91,7 @@ sdkman_install() {
 
   if [ ! -d "$candidate" ]; then
     log "  Installing $name $version ..."
-    sdkman_install "$name" "$version" >> "$LOGFILE"
+    sdk_install "$name" "$version" >> "$LOGFILE"
     log "  $name $version installed"
   else
     log "  $name $version already installed"
@@ -117,7 +117,7 @@ install_pyenv_update() {
   fi
 }
 
-install_python_version() {
+pyenv_install() {
   local version=$1
 
   if ! pyenv versions --bare | grep -q "$version"; then
@@ -130,9 +130,9 @@ install_python_version() {
 }
 
 
-# Main setup
+# Main installation
 
-setup() {
+install() {
   log "Setup workspace - macOS"
   log "  Version: $VERSION"
   log "  Logfile: $LOGFILE"
@@ -146,47 +146,45 @@ setup() {
 
   # Install prerequisites
   log "Installing prerequisites ..."
-  setup_xcode
-  setup_brew
+  install_prereq_xcode
+  install_prereq_brew
   log ""
 
   # Install Python & Tools
   log "Installing Python & Tools ..."
   install_pyenv
   install_pyenv_update
-  install_python_version "$PYTHON_VERSION"
+  pyenv_install "$PYTHON_VERSION"
   log ""
 
   # Install JDK & JVM Tools
   log "Installing JDK & JVM Tools ..."
-  setup_sdkman
-  sdkman_install java 17.0.2-open
-  sdkman_install kotlin
-  sdkman_install maven
-  sdkman_install gradle
+  install_sdkman
+  sdk_install "$JAVA_VERSION"
+  sdk_install kotlin
+  sdk_install maven
+  sdk_install gradle
   log ""
 
-  # Install dev-tools
-  log "Installing dev-tools ..."
+  # Install tools
+  log "Installing tools ..."
   brew_install_cask jetbrains-toolbox
   brew_install_cask visual-studio-code
   brew_install_cask cyberduck
-  log ""
-
-  # Install utilities
-  log "Installing utilities ..."
+  brew_install_cask docker
   brew_install_cask google-chrome
   brew_install_cask grammarly-desktop
   brew_install_cask 1password
   brew_install_cask 1password-cli
-
   log ""
+
   log "Setup done."
 }
 
 VERSION=1.0.0
-LOGFILE=$(mktemp ~/setuplog.XXXXXXXX) || exit 1
+LOGFILE=$(mktemp ~/install.log.XXXXXXXX) || exit 1
 
 PYTHON_VERSION=3.10.6
+JAVA_VERSION=17.0.2-open
 
-setup
+install
