@@ -4,7 +4,7 @@
 # personal liking. Feel free to fork and modify this file.
 
 # Single-line invocation:
-# /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/yanicksenn/setup/main/macOS/setup.sh)"
+# /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/yanicksenn/setup/main/macOS/install.sh)"
 
 
 # Utilities
