@@ -203,7 +203,7 @@ install() {
 }
 
 VERSION=1.0.0
-LOGFILE=$(mktemp ~/install.log.XXXXXXXX) || exit 1
+LOGFILE=$(mktemp ~/install-$VERSION.log.XXXXXXXX) || exit 1
 
 PYTHON_VERSION=3.10.6
 JAVA_VERSION=17.0.2-open
