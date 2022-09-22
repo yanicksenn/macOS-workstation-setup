@@ -1,10 +1,10 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
 # Installation script containing all sdks and tools to my
 # personal liking. Feel free to fork and modify this file.
 
 # Single-line invocation:
-# /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/yanicksenn/setup/main/macOS/install.sh)"
+# /bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/yanicksenn/setup/main/macOS/install.sh)"
 
 
 # Utilities
@@ -19,7 +19,8 @@ log() {
 confirm() {
   local message=$1
 
-  read -r -p "$message [y/N]: " response
+  # read -r -p "$message [y/N]: " response
+  read -r "response?$message [y/N]: "
   case "$response" in
       [yY][eE][sS]|[yY])
           true
@@ -159,45 +160,60 @@ install() {
   fi
   log ""
 
-  # Install prerequisites
-  log "Installing prerequisites ..."
-  install_prereq_xcode
-  install_prereq_brew
-  log ""
+  if [ "$INSTALL_PREREQ" = true ]; then
+    # Install prerequisites
+    log "Installing prerequisites ..."
+    install_prereq_xcode
+    install_prereq_brew
+    log ""
+  fi
 
-  # Install Python & Tools
-  log "Installing Python & Tools ..."
-  brew_install pyenv
-  install_pyenv_update
-  pyenv_install "$PYTHON_VERSION"
-  log ""
 
-  # Install JDK & JVM Tools
-  log "Installing JDK & JVM Tools ..."
-  install_sdkman
-  sdk_install "$JAVA_VERSION"
-  sdk_install kotlin
-  sdk_install maven
-  sdk_install gradle
-  log ""
+  if [ "$INSTALL_PYTHON" = true ]; then
+    # Install Python & Tools
+    log "Installing Python & Tools ..."
+    brew_install pyenv
+    install_pyenv_update
+    pyenv_install "$PYTHON_VERSION"
+    log ""
+  fi
 
-  # Install Tools
-  log "Installing Tools ..."
-  brew_install_cask jetbrains-toolbox
-  brew_install_cask visual-studio-code
-  brew_install_cask cyberduck
-  brew_install_cask docker
-  brew_install_cask google-chrome
-  brew_install_cask grammarly-desktop
-  brew_install_cask 1password
-  brew_install_cask 1password-cli
-  log ""
+  if [ "$INSTALL_JVM" = true ]; then
+    # Install JDK & JVM Tools
+    log "Installing JDK & JVM Tools ..."
+    install_sdkman
+    sdk_install "$JAVA_VERSION"
+    sdk_install kotlin
+    sdk_install maven
+    sdk_install gradle
+    log ""
+  fi
+
+
+  if [ "$INSTALL_TOOLS" = true ]; then
+    # Install Tools
+    log "Installing Tools ..."
+    brew_install_cask jetbrains-toolbox
+    brew_install_cask visual-studio-code
+    brew_install_cask cyberduck
+    brew_install_cask docker
+    brew_install_cask google-chrome
+    brew_install_cask grammarly-desktop
+    brew_install_cask 1password
+    brew_install_cask 1password-cli
+    log ""
+  fi
 
   log "Setup done."
 }
 
 VERSION=1.0.0
 LOGFILE=$(mktemp ~/install-$VERSION.log.XXXXXXXX) || exit 1
+
+INSTALL_PREREQ=false
+INSTALL_PYTHON=false
+INSTALL_JVM=true
+INSTALL_TOOLS=false
 
 PYTHON_VERSION=3.10.6
 JAVA_VERSION=17.0.2-open
