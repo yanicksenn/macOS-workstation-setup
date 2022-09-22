@@ -31,192 +31,93 @@ confirm() {
   esac
 }
 
-command_exists() {
-  local command=$1
-
-  if command -v "$command" &> /dev/null; then
-    true
-  else
-    false
-  fi
-}
-
-
-# Installation of xcode
-
-install_prereq_xcode() {
-  if ! xcode-select -p &> /dev/null; then
-    log "  Installing xcode ..."
-    xcode-select --install >> "$LOGFILE"
-    log "  xcode installed"
-  else
-    log "  xcode already installed"
-  fi
-}
-
-
-# Installation & usage of brew
-
-install_prereq_brew() {
-  if ! command_exists "brew"; then
-    log "  Installing brew ..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" >> "$LOGFILE"
-    log "  brew installed"
-  else
-    log "  brew already installed"
-  fi
-}
-
-brew_install() {
-  local name=$1
-
-  if ! brew list "$name" &> /dev/null; then
-    log "  Installing $name ..."
-    brew install "$name" >> "$LOGFILE"
-    log "  $name installed"
-  else
-    log "  $name already installed"
-  fi
-}
-
-brew_install_cask() {
-  local name=$1
-
-  if ! brew list "$name" &> /dev/null; then
-    log "  Installing $name ..."
-    brew install --cask "$name" >> "$LOGFILE"
-    log "  $name installed"
-  else
-    log "  $name already installed"
-  fi
-}
-
-
-# Installation & usage of sdkman
-
-install_sdkman() {
-  if ! command_exists "sdk"; then
-    log "  Installing sdkman ..."
-    curl -s "https://get.sdkman.io" | bash >> "$LOGFILE"
-    source "$HOME/.sdkman/bin/sdkman-init.sh"
-    log "  sdkman installed"
-  else
-    log "  sdkman already installed"
-  fi
-}
-
-sdk_install() {
-  local name=$1
-  local version=$2
-
-  local candidate=~/.sdkman/candidates/$name/$version
-
-  if [ ! -d "$candidate" ]; then
-    log "  Installing $name $version ..."
-    sdk_install "$name" "$version" >> "$LOGFILE"
-    log "  $name $version installed"
-  else
-    log "  $name $version already installed"
-  fi
-}
-
-
-# Installation & usage of pyenv
-
-install_pyenv_update() {
-  local path=$(pyenv root)/plugins/pyenv-update
-
-  if [ ! -d "$path" ]; then
-    log "  Installing pyenv-update ..."
-    git clone https://github.com/pyenv/pyenv-update.git "$path" >> "$LOGFILE"
-    log "  pyenv-update installed"
-  else
-    log "  pyenv-update already installed"
-  fi
-}
-
-pyenv_install() {
-  local version=$1
-
-  if ! pyenv versions --bare | grep -q "$version"; then
-    log "  Installing python $version ..."
-    pyenv install -s "$version" >> "$LOGFILE"
-    log "  python $version installed"
-  else
-    log "  python $version already installed"
-  fi
-}
-
-
-install() {
-  log "Setup workspace - macOS"
-  log "  Version: $VERSION"
-  log "  Logfile: $LOGFILE"
-  log ""
-
-  if ! confirm "Do you want to continue?"; then
-    log "User abort"
-    exit 1
-  fi
-  log ""
-
-  if [ "$INSTALL_PREREQ" = true ]; then
-    # Install prerequisites
-    log "Installing prerequisites ..."
-    install_prereq_xcode
-    install_prereq_brew
-    log ""
-  fi
-
-
-  if [ "$INSTALL_PYTHON" = true ]; then
-    # Install Python & Tools
-    log "Installing Python & Tools ..."
-    brew_install pyenv
-    install_pyenv_update
-    pyenv_install "$PYTHON_VERSION"
-    log ""
-  fi
-
-  if [ "$INSTALL_JVM" = true ]; then
-    # Install JDK & JVM Tools
-    log "Installing JDK & JVM Tools ..."
-    install_sdkman
-    sdk_install "$JAVA_VERSION"
-    sdk_install kotlin
-    sdk_install maven
-    sdk_install gradle
-    log ""
-  fi
-
-
-  if [ "$INSTALL_TOOLS" = true ]; then
-    # Install Tools
-    log "Installing Tools ..."
-    brew_install_cask jetbrains-toolbox
-    brew_install_cask visual-studio-code
-    brew_install_cask cyberduck
-    brew_install_cask docker
-    brew_install_cask google-chrome
-    brew_install_cask grammarly-desktop
-    brew_install_cask 1password
-    brew_install_cask 1password-cli
-    log ""
-  fi
-
-  log "Setup done."
-}
 
 VERSION=1.0.0
 LOGFILE=$(mktemp ~/install-$VERSION.log.XXXXXXXX) || exit 1
 
-INSTALL_PREREQ=false
-INSTALL_PYTHON=false
-INSTALL_JVM=true
-INSTALL_TOOLS=false
-
 PYTHON_VERSION=3.10.6
 JAVA_VERSION=17.0.2-open
 
-# Perform installation
-install
+
+log "Setup workspace - macOS"
+log "  Version: $VERSION"
+log "  Logfile: $LOGFILE"
+log ""
+
+if ! confirm "Do you want to continue?"; then
+  log "User abort"
+  exit 1
+fi
+log ""
+
+
+log "Installing prerequisites ..."
+
+log "  Installing xcode ..."
+xcode-select --install >> "$LOGFILE"
+
+log "  Installing brew ..."
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" >> "$LOGFILE"
+
+
+log "Installing Python & Tools ..."
+
+log "  Installing pyenv ..."
+brew install pyenv >> "$LOGFILE"
+
+log "  Installing pyenv-update ..."
+git clone https://github.com/pyenv/pyenv-update.git "$path" >> "$LOGFILE"
+
+log "  Installing python $PYTHON_VERSION ..."
+pyenv install -s "$PYTHON_VERSION" >> "$LOGFILE"
+
+
+log "Installing JDK & JVM Tools ..."
+
+log "  Installing sdkman ..."
+curl -s "https://get.sdkman.io" | bash >> "$LOGFILE"
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+log "  Installing java $JAVA_VERSION ..."
+sdk install java "$JAVA_VERSION" >> "$LOGFILE"
+
+log "  Installing kotlin ..."
+sdk install kotlin >> "$LOGFILE"
+
+log "  Installing maven ..."
+sdk install maven >> "$LOGFILE"
+
+log "  Installing gradle ..."
+sdk install gradle >> "$LOGFILE"
+
+
+log "Installing Tools ..."
+
+log "  Installing jetbrains-toolbox ..."
+brew install --cask jetbrains-toolbox >> "$LOGFILE"
+
+log "  Installing visual-studio-code ..."
+brew install --cask visual-studio-code >> "$LOGFILE"
+
+log "  Installing cyberduck ..."
+brew install --cask cyberduck >> "$LOGFILE"
+
+log "  Installing docker ..."
+brew install --cask docker >> "$LOGFILE"
+
+log "  Installing google-chrome ..."
+brew install --cask google-chrome >> "$LOGFILE"
+
+log "  Installing grammarly-desktop ..."
+brew install --cask grammarly-desktop >> "$LOGFILE"
+
+log "  Installing 1password ..."
+brew install --cask 1password >> "$LOGFILE"
+
+log "  Installing 1password-cli ..."
+brew install --cask 1password-cli >> "$LOGFILE"
+
+log ""
+
+
+log "Setup done."
